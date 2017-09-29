@@ -17,8 +17,8 @@ if __name__ == '__main__':
     # env = wrappers.Monitor(env, '/tmp/FrozenLake-v0-experiment-15')
 
     n_action = 11
-    n_width = 3
-    n_height = 1
+    n_width = 8
+    n_height = 3
     n_channel = 1
 
     n_episode = 1000
@@ -53,8 +53,9 @@ if __name__ == '__main__':
 
             env.render()
 
-            # action = dqn.choose_action(state, True if counter > n_width else False)
-            action = dqn.choose_action(observation)
+            action = dqn.choose_action(np.expand_dims(np.array(list(state)), axis=2), True if counter < n_width else False)
+            # action = dqn.choose_action(observation)
+            # action = dqn.choose_action(np.reshape(observation, (1, 3, 1)))
             f_action = (action-(n_action-1)/2)/((n_action-1)/4)
 
             observation_, reward, done, info = env.step(np.array([f_action]))
@@ -69,9 +70,20 @@ if __name__ == '__main__':
 
             state_.append(observation_)
 
-            # if counter > n_width:
-            #     dqn.store_transition(np.expand_dims(np.array(list(state)), axis=3), action, reward, np.expand_dims(np.array(list(state_)), axis=3))
-            dqn.store_transition(observation, action, reward, observation_)
+            # print('==========')
+            # print('o: {}'.format(np.reshape(observation, (1, 3, 1))))
+            # print('o: {}'.format(np.reshape(observation, (1, 3, 1)).shape))
+            # print('s: {}'.format(np.expand_dims(np.array(list(state)), axis=2)))
+            # print('s: {}'.format(np.expand_dims(np.array(list(state)), axis=2).shape))
+            # print('o_: {}'.format(np.reshape(observation_, (1, 3, 1))))
+            # print('o_: {}'.format(np.reshape(observation_, (1, 3, 1)).shape))
+            # print('s_: {}'.format(np.expand_dims(np.array(list(state_)), axis=2)))
+            # print('s_: {}'.format(np.expand_dims(np.array(list(state_)), axis=2).shape))
+            # print('==========')
+
+            if counter > n_width + 1:
+                dqn.store_transition(np.expand_dims(np.array(list(state)), axis=2), action, reward, np.expand_dims(np.array(list(state_)), axis=2))
+            # dqn.store_transition(observation, action, reward, observation_)
             # dqn.store_transition(np.reshape(observation, (1, 3, 1)), action, reward, np.reshape(observation_, (1, 3, 1)))
             counter += 1
 
@@ -87,4 +99,4 @@ if __name__ == '__main__':
             # print(counter)
 
             observation = observation_
-            state = state_
+            state = deque(list(state_))
